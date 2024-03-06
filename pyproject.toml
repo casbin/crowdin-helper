@@ -1,0 +1,19 @@
+[project]
+name = "crowdin-helper"
+version = "0.1.0"
+description = "Batch Translation with ChatGPT"
+authors = [
+    {name = "YunShu", email = "im@yunshu.site"},
+]
+dependencies = []
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "Apache"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
