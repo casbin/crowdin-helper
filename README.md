@@ -42,6 +42,8 @@ Useful links:
 
 ## Usage
 
+Warning: Sometimes, GPT's translation is unreliable. For some texts that should not be translated, the best way is to hide these texts in Crowdin.
+
 ### Config File
 
 `config.toml`:
