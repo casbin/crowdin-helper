@@ -134,6 +134,7 @@ class Translater:
             json_res = json.loads(res)
         except Exception as e:
             logging.error(f"Error: {e}")
+            logging.error(f"GPT output: \n {res} \n")
             raise e
 
         """

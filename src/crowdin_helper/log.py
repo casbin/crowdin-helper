@@ -17,7 +17,7 @@ LOGGING_CONFIG = {
         "file": {
             "class": "logging.handlers.TimedRotatingFileHandler",
             "filename": "crowdin_helper.log",
-            "when": "M",
+            "when": "midnight",
             "level": "INFO",
             "formatter": "default",
         },

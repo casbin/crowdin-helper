@@ -24,7 +24,8 @@ def completion(prompt, model="gpt-4"):
     stream = gpt_completion_steam(prompt, model)
     logging.info("Start getting completion from OpenAI")
     for chunk in stream:
-        print(chunk.choices[0].delta.content or "", end="")
-        result += chunk.choices[0].delta.content or ""
+        content = chunk.choices[0].delta.content or ""
+        result += content
+        print(content, end="")
     logging.info("End getting completion from OpenAI")
     return result
