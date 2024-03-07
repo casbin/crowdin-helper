@@ -1,7 +1,7 @@
 [project]
 name = "crowdin-helper"
 version = "0.1.0"
-description = "Batch Translation with ChatGPT"
+description = "Batch translation of Crowdin projects using ChatGPT"
 authors = [
     {name = "YunShu", email = "im@yunshu.site"},
 ]
@@ -18,7 +18,7 @@ license = {text = "Apache"}
 [tool.pdm]
 distribution = true
 [tool.pdm.scripts]
-_.env_file = ".env"
+#_.env_file = ".env"
 dev = {call = "crowdin_helper.__main__:main"}
 
 [tool.pdm.dev-dependencies]

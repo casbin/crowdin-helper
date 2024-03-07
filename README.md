@@ -1,5 +1,7 @@
 # crowdin-helper
 
+Crowdin Helper is a tool to help you translate your docs using OpenAI and Crowdin.
+
 ## Dev
 
 install PDM: https://pdm-project.org/latest/#recommended-installation-method
@@ -9,47 +11,88 @@ install PDM: https://pdm-project.org/latest/#recommended-installation-method
 pdm install
 # run
 pdm dev
+# help
+pdm dev --help
+# build
+pdm build
+# install
+pdm install # install to virtual environment
+pip install dist/crowdin_helper-0.1.0-py3-none-any.whl # install from wheel
+# run after install
+python -m crowdin_helper
 ```
 
-## Run
+## Options
 
-Crowdin Helper need 3 options to run:
+Crowdin Helper needs the following options to run:
 
-| Option             | Required | Description        |
-| ------------------ | -------- | ------------------ |
-| OPENAI_API_KEY     | true     | OpenAI API Key     |
-| OPENAI_BASE_URL    | false    | OpenAI Base URL    |
-| CROWDIN_API_KEY    | true     | Crowdin API Key    |
-| CROWDIN_PROJECT_ID | true     | Crowdin Project ID |
+| Option             | Required | Description                   | Default Value             |
+|--------------------|----------|-------------------------------|---------------------------|
+| OPENAI_API_KEY     | true     | OpenAI API Key                |                           |
+| OPENAI_BASE_URL    | false    | OpenAI Base URL               | https://api.openai.com/v1 |
+| OPENAI_MODEL       | false    | OpenAI Model                  | gpt-4                     |
+| CROWDIN_API_KEY    | true     | Crowdin API Key               |                           |
+| CROWDIN_PROJECT_ID | true     | Crowdin Project ID            |                           |
+| CROWDIN_LANGS      | true     | The languages to translate to |                           |
 
 ## Usage
 
-### Cli Options
+### Config File
+
+`config.toml`:
+
+```toml
+OPENAI_API_KEY = 'sk-xxx'
+OPENAI_BASE_URL = "https://api.openai.com/v1"
+OPENAI_MODEL = "gpt-4"
+CROWDIN_API_KEY = "xxx"
+CROWDIN_PROJECT_ID = "123456"
+CROWDIN_LANGS = '["zh-CN", "fr", "de", "ku", "ru", "ja"]'
+```
 
 ```bash
-pdm dev --openai-api-key your_openai_api_key --openai-base-url your_openai_base_url --crowdin-api-key your_crowdin_api_key --crowdin-project-id your_crowdin_project_id
+pdm dev --config-file your_config_file_path
+```
+
+### Cli
+
+```bash
+pdm dev --openai-api-key "sk-xxx" \
+        --openai-base-url "https://api.openai.com/v1" \
+        --openai-model "gpt-4" \
+        --crowdin-api-key "xxx" \
+        --crowdin-project-id "123456" \
+        --crowdin-langs '["zh-CN", "fr", "de", "ku", "ru", "ja"]'
 ```
 
 ### Environment Variables
 
 ```bash
-export OPENAI_API_KEY=your_openai_api_key
-export OPENAI_BASE_URL=your_openai_base_url
-export CROWDIN_API_KEY=your_crowdin_api_key
-export CROWDIN_PROJECT_ID=your_crowdin_project_id
+export CH_OPENAI_API_KEY='sk-xxx'
+export CH_OPENAI_BASE_URL="https://api.openai.com/v1"
+export CH_OPENAI_MODEL="gpt-4"
+export CH_CROWDIN_API_KEY="xxx"
+export CH_CROWDIN_PROJECT_ID="123456"
+export CH_CROWDIN_LANGS='["zh-CN", "fr", "de", "ku", "ru", "ja"]'
 ```
 
-### Config File
-
-```toml
-OPENAI_API_KEY = "your_openai_api_key"
-OPENAI_BASE_URL = "your_openai_base_url"
-CROWDIN_API_KEY = "your_crowdin_api_key"
-CROWDIN_PROJECT_ID = "your_crowdin_project_id"
-```
+also support `.env` file:
 
 ```bash
-pdm dev --config-file your_config_file_path
+CH_OPENAI_API_KEY='sk-xxx'
+CH_OPENAI_BASE_URL="https://api.openai.com/v1"
+CH_OPENAI_MODEL="gpt-4"
+CH_CROWDIN_API_KEY="xxx"
+CH_CROWDIN_PROJECT_ID="123456"
+CH_CROWDIN_LANGS='["zh-CN", "fr", "de", "ku", "ru", "ja"]'
+```
+
+then run:
+
+```bash
+pdm dev
+# or
+python -m crowdin_helper
 ```
 
 ## TODO
