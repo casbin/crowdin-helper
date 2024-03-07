@@ -1,0 +1,32 @@
+[project]
+name = "crowdin-helper"
+version = "0.1.0"
+description = "Batch translation of Crowdin projects using ChatGPT"
+authors = [
+    {name = "YunShu", email = "im@yunshu.site"},
+]
+dependencies = [
+    "crowdin-api-client>=1.14.1",
+    "openai>=1.13.3",
+    "click>=8.1.7",
+    "dynaconf>=3.2.4",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "Apache"}
+
+[tool.pdm]
+distribution = true
+[tool.pdm.scripts]
+#_.env_file = ".env"
+dev = {call = "crowdin_helper.__main__:main"}
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "pytest>=8.0.2",
+]
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
