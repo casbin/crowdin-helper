@@ -1,6 +1,6 @@
 # crowdin-helper
 
-Crowdin Helper is a tool to help you translate your docs using OpenAI and Crowdin.
+Crowdin Helper is a tool to help you batch translate your Crowdin project using OpenAI's API.
 
 ## Dev
 
@@ -27,13 +27,18 @@ python -m crowdin_helper
 Crowdin Helper needs the following options to run:
 
 | Option             | Required | Description                   | Default Value             |
-|--------------------|----------|-------------------------------|---------------------------|
+| ------------------ | -------- | ----------------------------- | ------------------------- |
 | OPENAI_API_KEY     | true     | OpenAI API Key                |                           |
 | OPENAI_BASE_URL    | false    | OpenAI Base URL               | https://api.openai.com/v1 |
 | OPENAI_MODEL       | false    | OpenAI Model                  | gpt-4                     |
 | CROWDIN_API_KEY    | true     | Crowdin API Key               |                           |
 | CROWDIN_PROJECT_ID | true     | Crowdin Project ID            |                           |
 | CROWDIN_LANGS      | true     | The languages to translate to |                           |
+
+Useful links:
+
+- OpenAI model list : https://platform.openai.com/docs/models/overview
+- Crowdin languages list : https://developer.crowdin.com/language-codes/
 
 ## Usage
 
@@ -47,11 +52,41 @@ OPENAI_BASE_URL = "https://api.openai.com/v1"
 OPENAI_MODEL = "gpt-4"
 CROWDIN_API_KEY = "xxx"
 CROWDIN_PROJECT_ID = "123456"
-CROWDIN_LANGS = '["zh-CN", "fr", "de", "ku", "ru", "ja"]'
+CROWDIN_LANGS = '"zh-CN", "fr", "de", "ku", "ru", "ja"'
 ```
 
 ```bash
 pdm dev --config-file your_config_file_path
+```
+
+### Environment Variables
+
+```bash
+export CH_OPENAI_API_KEY='sk-xxx'
+export CH_OPENAI_BASE_URL="https://api.openai.com/v1"
+export CH_OPENAI_MODEL="gpt-4"
+export CH_CROWDIN_API_KEY="xxx"
+export CH_CROWDIN_PROJECT_ID="123456"
+export CH_CROWDIN_LANGS='"zh-CN", "fr", "de", "ku", "ru", "ja"'
+```
+
+also support `.env` file:
+
+```bash
+CH_OPENAI_API_KEY='sk-xxx'
+CH_OPENAI_BASE_URL="https://api.openai.com/v1"
+CH_OPENAI_MODEL="gpt-4"
+CH_CROWDIN_API_KEY="xxx"
+CH_CROWDIN_PROJECT_ID="123456"
+CH_CROWDIN_LANGS='"zh-CN", "fr", "de", "ku", "ru", "ja"'
+```
+
+then run:
+
+```bash
+pdm dev
+# or
+python -m crowdin_helper
 ```
 
 ### Cli
@@ -63,36 +98,6 @@ pdm dev --openai-api-key "sk-xxx" \
         --crowdin-api-key "xxx" \
         --crowdin-project-id "123456" \
         --crowdin-langs '["zh-CN", "fr", "de", "ku", "ru", "ja"]'
-```
-
-### Environment Variables
-
-```bash
-export CH_OPENAI_API_KEY='sk-xxx'
-export CH_OPENAI_BASE_URL="https://api.openai.com/v1"
-export CH_OPENAI_MODEL="gpt-4"
-export CH_CROWDIN_API_KEY="xxx"
-export CH_CROWDIN_PROJECT_ID="123456"
-export CH_CROWDIN_LANGS='["zh-CN", "fr", "de", "ku", "ru", "ja"]'
-```
-
-also support `.env` file:
-
-```bash
-CH_OPENAI_API_KEY='sk-xxx'
-CH_OPENAI_BASE_URL="https://api.openai.com/v1"
-CH_OPENAI_MODEL="gpt-4"
-CH_CROWDIN_API_KEY="xxx"
-CH_CROWDIN_PROJECT_ID="123456"
-CH_CROWDIN_LANGS='["zh-CN", "fr", "de", "ku", "ru", "ja"]'
-```
-
-then run:
-
-```bash
-pdm dev
-# or
-python -m crowdin_helper
 ```
 
 ## TODO

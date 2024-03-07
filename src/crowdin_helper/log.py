@@ -5,7 +5,7 @@ LOGGING_CONFIG = {
     "disable_existing_loggers": False,
     "formatters": {
         "default": {
-            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            "format": "%(asctime)s - %(levelname)s - %(message)s",
         },
     },
     "handlers": {
@@ -15,8 +15,9 @@ LOGGING_CONFIG = {
             "formatter": "default",
         },
         "file": {
-            "class": "logging.FileHandler",
-            "filename": "crowdin_helper-%Y-%m-%d-%H-%M-%S.log",
+            "class": "logging.TimedRotatingFileHandler",
+            "filename": "crowdin_helper.log",
+            "when": "M",
             "level": "INFO",
             "formatter": "default",
         },

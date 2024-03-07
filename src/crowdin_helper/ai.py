@@ -1,5 +1,5 @@
 from openai import Client
-from .config import settings
+from crowdin_helper.config import settings
 import logging
 
 client = Client(

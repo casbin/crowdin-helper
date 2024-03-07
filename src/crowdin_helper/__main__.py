@@ -1,16 +1,18 @@
 import logging
 
 import click
-from .config import settings
-from log import init_logging
-from crowdin import Translater
-import json
+from crowdin_helper.config import settings
+from crowdin_helper.log import init_logging
+from crowdin_helper.crowdin import Translater
 
 
 def run_translater():
     project_id = int(settings.CROWDIN_PROJECT_ID)
-    langs = json.loads(settings.CROWDIN_LANGS)
+    langs: list[str] = settings.CROWDIN_LANGS.split(",")
+    langs = [lang.strip("'\"") for lang in langs]
+
     translater = Translater(project_id)
+
     for lang_id in langs:
         logging.info(f"Start translating to {lang_id}")
         translater.run(lang_id)

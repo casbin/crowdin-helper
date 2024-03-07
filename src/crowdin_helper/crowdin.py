@@ -1,10 +1,9 @@
 from crowdin_api import CrowdinClient
-import os
 from pathlib import Path
 import json
-from .ai import completion
+from crowdin_helper.ai import completion
 import logging
-from .config import settings
+from crowdin_helper.config import settings
 
 
 class FirstCrowdinClient(CrowdinClient):
