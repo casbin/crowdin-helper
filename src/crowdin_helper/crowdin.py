@@ -70,13 +70,15 @@ Please translate:
 class Translater:
     project_id: int
     project_name: str
+    target_langs: list[str]
 
     files: list[CrowdinFile] = []
 
     def __init__(self, project_id: int):
         self.project_id = project_id
-        name = crowdin.projects.get_project(project_id)["data"]["name"]
-        self.project_name = name
+        data = crowdin.projects.get_project(project_id)["data"]
+        self.project_name = data["name"]
+        self.target_langs = data["targetLanguageIds"]
 
     def fetch_files(self):
         data = crowdin.source_files.list_files(self.project_id, limit=500)["data"]
@@ -216,6 +218,9 @@ class Translater:
 
     def run(self, lang_id):
         self.fetch_files()
+        if lang_id not in self.target_langs:
+            logging.error(f"Language {lang_id} is not in {self.project_name} target languages")
+            return
 
         lang_name = self.get_lang_name(lang_id)
 
