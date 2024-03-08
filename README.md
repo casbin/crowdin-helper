@@ -54,7 +54,7 @@ OPENAI_BASE_URL = "https://api.openai.com/v1"
 OPENAI_MODEL = "gpt-4"
 CROWDIN_API_KEY = "xxx"
 CROWDIN_PROJECT_ID = "123456"
-CROWDIN_LANGS = 'zh-CN, fr, de, ku, ru, ja'
+CROWDIN_LANGS = 'zh-CN, fr, de, ko, ru, ja'
 ```
 
 ```bash
@@ -69,7 +69,7 @@ export CH_OPENAI_BASE_URL="https://api.openai.com/v1"
 export CH_OPENAI_MODEL="gpt-4"
 export CH_CROWDIN_API_KEY="xxx"
 export CH_CROWDIN_PROJECT_ID="123456"
-export CH_CROWDIN_LANGS='zh-CN, fr, de, ku, ru, ja'
+export CH_CROWDIN_LANGS='zh-CN, fr, de, ko, ru, ja'
 ```
 
 also support `.env` file:
@@ -80,7 +80,7 @@ CH_OPENAI_BASE_URL="https://api.openai.com/v1"
 CH_OPENAI_MODEL="gpt-4"
 CH_CROWDIN_API_KEY="xxx"
 CH_CROWDIN_PROJECT_ID="123456"
-CH_CROWDIN_LANGS='zh-CN, fr, de, ku, ru, ja'
+CH_CROWDIN_LANGS='zh-CN, fr, de, ko, ru, ja'
 ```
 
 then run:
@@ -99,7 +99,7 @@ pdm dev --openai-api-key "sk-xxx" \
         --openai-model "gpt-4" \
         --crowdin-api-key "xxx" \
         --crowdin-project-id "123456" \
-        --crowdin-langs "zh-CN, fr, de, ku, ru, ja"
+        --crowdin-langs "zh-CN, fr, de, ko, ru, ja"
 ```
 
 ## TODO
