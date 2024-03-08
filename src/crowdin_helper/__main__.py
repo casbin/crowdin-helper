@@ -9,7 +9,7 @@ from crowdin_helper.crowdin import Translater
 def run_translater():
     project_id = int(settings.CROWDIN_PROJECT_ID)
     langs: list[str] = settings.CROWDIN_LANGS.split(",")
-    langs = [lang.strip("'\"") for lang in langs]
+    langs = [lang.strip(" ") for lang in langs]
 
     translater = Translater(project_id)
 
