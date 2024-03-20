@@ -48,6 +48,11 @@ class CrowdinString:
     def __str__(self):
         return self.text
 
+class APIError(Exception):
+    pass
+
+class JSONParseError(Exception):
+    pass
 
 PROMPT = """
 Please translate the following texts enclosed in triple backticks into {lang}, following the rules below:
@@ -73,6 +78,8 @@ class Translater:
     target_langs: list[str]
 
     files: list[CrowdinFile] = []
+    failed_file: set[str] = set([])
+    api_error_count: int = 0
 
     def __init__(self, project_id: int):
         self.project_id = project_id
@@ -130,14 +137,15 @@ class Translater:
         )
         pmt = PROMPT.format(lang=lang) + append_text
 
-        res = completion(pmt)
+        try:
+            res = completion(pmt)
+        except Exception as e:
+            raise APIError(f"Failed to call OpenAI API: {e}")
 
         try:
             json_res = json.loads(res)
         except Exception as e:
-            logging.error(f"Error: {e}")
-            logging.error(f"GPT output: \n {res} \n")
-            raise e
+            raise JSONParseError(f"Failed to parse GPT output: {e}")
 
         """
         Sometimes, the response enclosed in triple backticks
@@ -183,11 +191,9 @@ class Translater:
                 text=translation,
             )
         except Exception as e:
-            logging.error(f"Failed to submit translation for string(id: {string_id})")
-            logging.error(f"Error: {e}")
-            raise e
+            raise APIError(f"Failed to submit translation(string_id: {string_id}): {e}")
 
-    def file_translate(self, file: CrowdinFile, lang_id: str, lang_name: str, failed_file: list[str]):
+    def file_translate(self, file: CrowdinFile, lang_id: str, lang_name: str):
         logging.info(f"Now translating(id: {file.id}): {file.path}")
         ss = self.fetch_strings(file.id)
 
@@ -200,11 +206,24 @@ class Translater:
 
         batch_size = 30
         for i in range(0, len(strings), batch_size):
+            # Sometimes, OpenAI API or Crowdin API will keep erroring
+            # if the error count exceeds 5, stop translating
+            if self.api_error_count > 5:
+                logging.error(f"Too many errors, stop translating")
+                self.print_failed_files()
+                exit(-1)
+
             texts = [string.text for string in strings[i: i + batch_size]]
             try:
                 translation = self.batch_translate(texts, lang_name)
+            except APIError as e:
+                self.failed_file.add(file.path)
+                self.api_error_count += 1
+                logging.error(f"Error: {e}")
+                continue
             except Exception as e:
-                failed_file.append(file.path)
+                self.failed_file.add(file.path)
+                logging.error(f"Error: {e}")
                 continue
 
             for j, t in enumerate(translation):
@@ -212,9 +231,20 @@ class Translater:
                 logging.info(strings[i + j].text)
                 logging.info(f"Translation:")
                 logging.info(t["translation"])
-                self.submit_translation(
-                    strings[i + j].id, lang_id, t["translation"]
-                )
+                try:
+                    self.submit_translation(
+                        strings[i + j].id, lang_id, t["translation"]
+                    )
+                except APIError as e:
+                    self.failed_file.add(file.path)
+                    self.api_error_count += 1
+                    continue
+
+    def print_failed_files(self):
+        if self.failed_file:
+            logging.info("Failed files:")
+            for file in self.failed_file:
+                logging.info(file)
 
     def run(self, lang_id):
         self.fetch_files()
@@ -224,21 +254,17 @@ class Translater:
 
         lang_name = self.get_lang_name(lang_id)
 
-        failed_file: list[str] = []
         for file in self.files:
             # skip 100% translated files
             if self.get_file_progress(file.id, lang_id) == 100:
                 continue
 
             try:
-                self.file_translate(file, lang_id, lang_name, failed_file)
+                self.file_translate(file, lang_id, lang_name)
             except Exception as e:
                 logging.error(f"Failed to translate file: {file.path}")
                 logging.error(f"Error: {e}")
-                failed_file.append(file.path)
+                self.failed_file.add(file.path)
                 continue
 
-        if failed_file:
-            logging.info("Failed files:")
-            for file in failed_file:
-                logging.info(file)
+        self.print_failed_files()
