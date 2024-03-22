@@ -162,6 +162,14 @@ class Translater:
         except Exception as e:
             raise ParseError(f"Failed to parse GPT output: {e}")
 
+        if not isinstance(json_res, list):
+            if json_res["translation"].startswith("```") and json_res["translation"].endswith(
+                "```"
+            ):
+                json_res["translation"] = json_res["translation"][3:-3]
+            
+            return [json_res["translation"]]
+
         """
         Sometimes, the response enclosed in triple backticks
         """

@@ -19,8 +19,8 @@ def test_list_parse():
         "text3",
     ]
 
-    assert Translater.list_parse(input1) == answer
-    assert Translater.list_parse(input2) == answer
+    assert Translater.list_parse(input1.strip()) == answer
+    assert Translater.list_parse(input2.strip()) == answer
     with pytest.raises(ParseError):
         Translater.list_parse("xxx")
 
@@ -56,7 +56,14 @@ def test_json_parse():
         "text3",
     ]
 
-    assert Translater.json_parse(input1) == answer
-    assert Translater.json_parse(input2) == answer
+    assert Translater.json_parse(input1.strip()) == answer
+    assert Translater.json_parse(input2.strip()) == answer
     with pytest.raises(ParseError):
         Translater.json_parse("xxx")
+
+    text3 = """
+{
+"translation": "text"
+}
+"""
+    assert Translater.json_parse(text3.strip()) == ["text"]
