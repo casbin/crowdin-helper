@@ -48,11 +48,22 @@ class CrowdinString:
     def __str__(self):
         return self.text
 
-class APIError(Exception):
-    pass
 
-class JSONParseError(Exception):
-    pass
+class APIError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
+class ParseError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
 
 PROMPT = """
 Please translate the following texts enclosed in triple backticks into {lang}, following the rules below:
@@ -79,7 +90,7 @@ class Translater:
 
     files: list[CrowdinFile] = []
     failed_file: set[str] = set([])
-    api_error_count: int = 0
+    error_count: int = 0
 
     def __init__(self, project_id: int):
         self.project_id = project_id
@@ -131,7 +142,41 @@ class Translater:
         return strings
 
     @staticmethod
-    def batch_translate(texts: list[str], lang: str) -> json:
+    def list_parse(input: str) -> list[str]:
+        lines = input.split("\n")
+        res: list[str] = []
+        for i, line in enumerate(lines):
+            if line.startswith(f"{i + 1}. "):
+                line = line[len(f"{i + 1}. ") :]
+                if line.startswith("```") and line.endswith("```"):
+                    line = line[3:-3]
+                res.append(line)
+            else:
+                raise ParseError(f"Failed to parse GPT output")
+        return res
+
+    @staticmethod
+    def json_parse(input: str) -> list[str]:
+        try:
+            json_res = json.loads(input)
+        except Exception as e:
+            raise ParseError(f"Failed to parse GPT output: {e}")
+
+        """
+        Sometimes, the response enclosed in triple backticks
+        """
+        for trans in json_res:
+            if trans["translation"].startswith("```") and trans["translation"].endswith(
+                "```"
+            ):
+                trans["translation"] = trans["translation"][3:-3]
+
+        res = [trans["translation"] for trans in json_res]
+
+        return res
+
+    @staticmethod
+    def batch_translate(texts: list[str], lang: str) -> list[str]:
         append_text = "\n".join(
             [f"{num}. ```{text}```" for num, text in enumerate(texts)]
         )
@@ -142,21 +187,14 @@ class Translater:
         except Exception as e:
             raise APIError(f"Failed to call OpenAI API: {e}")
 
-        try:
-            json_res = json.loads(res)
-        except Exception as e:
-            raise JSONParseError(f"Failed to parse GPT output: {e}")
+        res = res.strip()
 
-        """
-        Sometimes, the response enclosed in triple backticks
-        """
-        for i, text in enumerate(texts):
-            if json_res[i]["translation"].startswith("```") and json_res[i][
-                "translation"
-            ].endswith("```"):
-                json_res[i]["translation"] = json_res[i]["translation"][3:-3]
-
-        return json_res
+        logging.info(f"OpenAI response: \n{res}\n")
+        
+        if res.startswith("1"):
+            return Translater.list_parse(res)
+        else:
+            return Translater.json_parse(res)
 
     def check_translation_if_existed(self, string_id, lang_id):
         res = crowdin.string_translations.list_string_translations(
@@ -208,36 +246,31 @@ class Translater:
         for i in range(0, len(strings), batch_size):
             # Sometimes, OpenAI API or Crowdin API will keep erroring
             # if the error count exceeds 5, stop translating
-            if self.api_error_count > 5:
+            if self.error_count > 5:
                 logging.error(f"Too many errors, stop translating")
                 self.print_failed_files()
                 exit(-1)
 
-            texts = [string.text for string in strings[i: i + batch_size]]
+            texts = [string.text for string in strings[i : i + batch_size]]
             try:
                 translation = self.batch_translate(texts, lang_name)
-            except APIError as e:
-                self.failed_file.add(file.path)
-                self.api_error_count += 1
-                logging.error(f"Error: {e}")
-                continue
             except Exception as e:
                 self.failed_file.add(file.path)
+                self.error_count += 1
                 logging.error(f"Error: {e}")
                 continue
 
-            for j, t in enumerate(translation):
+            for j, trans in enumerate(translation):
                 logging.info(f"Original text(id: {strings[i + j].id}):")
                 logging.info(strings[i + j].text)
                 logging.info(f"Translation:")
-                logging.info(t["translation"])
+                logging.info(trans)
                 try:
-                    self.submit_translation(
-                        strings[i + j].id, lang_id, t["translation"]
-                    )
-                except APIError as e:
+                    self.submit_translation(strings[i + j].id, lang_id, trans)
+                except Exception as e:
                     self.failed_file.add(file.path)
-                    self.api_error_count += 1
+                    self.error_count += 1
+                    logging.error(f"Error: {e}")
                     continue
 
     def print_failed_files(self):
@@ -249,10 +282,13 @@ class Translater:
     def run(self, lang_id):
         self.fetch_files()
         if lang_id not in self.target_langs:
-            logging.error(f"Language {lang_id} is not in {self.project_name} target languages")
+            logging.error(
+                f"Language {lang_id} is not in {self.project_name} target languages"
+            )
             return
 
         lang_name = self.get_lang_name(lang_id)
+        logging.info(f"Start translate {self.project_name} to {lang_name}")
 
         for file in self.files:
             # skip 100% translated files
