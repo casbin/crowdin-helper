@@ -193,7 +193,6 @@ class Translater:
         try:
             res = completion(pmt)
         except Exception as e:
-            logging.exception(e)
             raise APIError(f"Failed to call OpenAI API: {e}")
 
         res = res.strip()
