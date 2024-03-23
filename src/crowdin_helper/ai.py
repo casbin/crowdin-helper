@@ -18,13 +18,14 @@ def gpt_completion_steam(prompt: str, model: str) -> str:
         temperature=0,
         stream=True,
     )
+    result = ""
     logging.info("Start getting completion from OpenAI")
     for chunk in stream:
         content = chunk.choices[0].delta.content or ""
         result += content
         print(content, end="")
     logging.info("End getting completion from OpenAI")
-    return stream
+    return result
 
 
 def completion(prompt, model="gpt-4", max_retries=5, delay=3):
