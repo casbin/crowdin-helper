@@ -17,3 +17,5 @@ if settings.get("CROWDIN_PROJECT_ID") is None:
     settings.CROWDIN_PROJECT_ID = ""
 if settings.get("CROWDIN_LANGS") is None:
     settings.CROWDIN_LANGS = ""
+if settings.get("BATCH_SIZE") is None:
+    settings.BATCH_SIZE = 30

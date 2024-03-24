@@ -91,6 +91,7 @@ class Translater:
     files: list[CrowdinFile] = []
     failed_file: set[str] = set([])
     error_count: int = 0
+    batch_size: int = settings.BATCH_SIZE
 
     def __init__(self, project_id: int):
         self.project_id = project_id
@@ -163,11 +164,11 @@ class Translater:
             raise ParseError(f"Failed to parse GPT output: {e}")
 
         if not isinstance(json_res, list):
-            if json_res["translation"].startswith("```") and json_res["translation"].endswith(
-                "```"
-            ):
+            if json_res["translation"].startswith("```") and json_res[
+                "translation"
+            ].endswith("```"):
                 json_res["translation"] = json_res["translation"][3:-3]
-            
+
             return [json_res["translation"]]
 
         """
@@ -191,14 +192,14 @@ class Translater:
         pmt = PROMPT.format(lang=lang) + append_text
 
         try:
-            res = completion(pmt)
+            res = completion(pmt, model=settings.OPENAI_MODEL)
         except Exception as e:
             raise APIError(f"Failed to call OpenAI API: {e}")
 
         res = res.strip()
 
         logging.info(f"OpenAI response: \n{res}\n")
-        
+
         if res.startswith("1"):
             return Translater.list_parse(res)
         else:
@@ -250,8 +251,7 @@ class Translater:
 
         logging.info(f"Strings need to be translated: {len(strings)}")
 
-        batch_size = 30
-        for i in range(0, len(strings), batch_size):
+        for i in range(0, len(strings), self.batch_size):
             # Sometimes, OpenAI API or Crowdin API will keep erroring
             # if the error count exceeds 5, stop translating
             if self.error_count > 5:
@@ -259,7 +259,7 @@ class Translater:
                 self.print_failed_files()
                 exit(-1)
 
-            texts = [string.text for string in strings[i : i + batch_size]]
+            texts = [string.text for string in strings[i : i + self.batch_size]]
             try:
                 translation = self.batch_translate(texts, lang_name)
             except Exception as e:

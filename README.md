@@ -26,14 +26,15 @@ python -m crowdin_helper
 
 Crowdin Helper needs the following options to run:
 
-| Option             | Required | Description                   | Default Value             |
-| ------------------ | -------- | ----------------------------- | ------------------------- |
-| OPENAI_API_KEY     | true     | OpenAI API Key                |                           |
-| OPENAI_BASE_URL    | false    | OpenAI Base URL               | https://api.openai.com/v1 |
-| OPENAI_MODEL       | false    | OpenAI Model                  | gpt-4                     |
-| CROWDIN_API_KEY    | true     | Crowdin API Key               |                           |
-| CROWDIN_PROJECT_ID | true     | Crowdin Project ID            |                           |
-| CROWDIN_LANGS      | true     | The languages to translate to |                           |
+| Option             | Required | Description                                | Default Value             |
+| ------------------ | -------- | ------------------------------------------ | ------------------------- |
+| OPENAI_API_KEY     | true     | OpenAI API Key                             |                           |
+| OPENAI_BASE_URL    | false    | OpenAI Base URL                            | https://api.openai.com/v1 |
+| OPENAI_MODEL       | false    | OpenAI Model                               | gpt-4                     |
+| CROWDIN_API_KEY    | true     | Crowdin API Key                            |                           |
+| CROWDIN_PROJECT_ID | true     | Crowdin Project ID                         |                           |
+| CROWDIN_LANGS      | true     | The languages to translate to              |                           |
+| BATCH_SIZE         | false    | The number of strings to translate at once | 30                        |
 
 Useful links:
 
@@ -55,6 +56,7 @@ OPENAI_MODEL = "gpt-4"
 CROWDIN_API_KEY = "xxx"
 CROWDIN_PROJECT_ID = "123456"
 CROWDIN_LANGS = 'zh-CN, fr, de, ko, ru, ja'
+BATCH_SIZE = 30
 ```
 
 ```bash
@@ -70,6 +72,7 @@ export CH_OPENAI_MODEL="gpt-4"
 export CH_CROWDIN_API_KEY="xxx"
 export CH_CROWDIN_PROJECT_ID="123456"
 export CH_CROWDIN_LANGS='zh-CN, fr, de, ko, ru, ja'
+export CH_BATCH_SIZE=30
 ```
 
 also support `.env` file:
@@ -81,6 +84,7 @@ CH_OPENAI_MODEL="gpt-4"
 CH_CROWDIN_API_KEY="xxx"
 CH_CROWDIN_PROJECT_ID="123456"
 CH_CROWDIN_LANGS='zh-CN, fr, de, ko, ru, ja'
+CH_BATCH_SIZE=30
 ```
 
 then run:
@@ -99,7 +103,8 @@ pdm dev --openai-api-key "sk-xxx" \
         --openai-model "gpt-4" \
         --crowdin-api-key "xxx" \
         --crowdin-project-id "123456" \
-        --crowdin-langs "zh-CN, fr, de, ko, ru, ja"
+        --crowdin-langs "zh-CN, fr, de, ko, ru, ja" \
+        --batch-size 30
 ```
 
 ## TODO
