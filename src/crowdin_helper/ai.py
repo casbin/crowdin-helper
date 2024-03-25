@@ -22,6 +22,10 @@ def gpt_completion_steam(prompt: str, model: str) -> str:
     result = ""
     logging.info("Start getting completion from OpenAI")
     for chunk in stream:
+        if len(chunk.choices)==0:
+            stream.close()
+            raise Exception("No completion from OpenAI")
+
         content = chunk.choices[0].delta.content or ""
         result += content
         print(content, end="")
