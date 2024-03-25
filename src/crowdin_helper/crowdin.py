@@ -66,20 +66,30 @@ class ParseError(Exception):
 
 
 PROMPT = """
-Please translate the following texts enclosed in triple backticks into {lang}, following the rules below:
+Please follow my rules and examples to translate the given text into {lang}
+
+rules:
 1. The text may contain code, which should be preserved as is.
 2. The text may contain HTML tags or HTML escape characters, which should not be translated.
-3. Please return the translated text or the original text in JSON format, containing a key-value pair, with the key as "translation" and the value as the translated or original text.
-4. If there are multiple texts to be translated, please return them in an array format.
-5. If you are unsure how to translate, please return the original text.
+3. If you are unsure how to translate, please return the original text.
+4. Please return the translated text or the original text in JSON array format.
+
+example input:
+
+1. text1
+2. text2
+3. text3
+
+example output:
+
+[
+"translated text1",
+"translated text2",
+"translated text3"
+]
 
 Please translate:
-"""
 
-"""
-1. ```{text1}```
-2. ```{text2}```
-3. ```{text3}```
 """
 
 
@@ -143,54 +153,28 @@ class Translater:
         return strings
 
     @staticmethod
-    def list_parse(input: str) -> list[str]:
-        lines = input.split("\n")
-        res: list[str] = []
-        for i, line in enumerate(lines):
-            if line.startswith(f"{i + 1}. "):
-                line = line[len(f"{i + 1}. ") :]
-                if line.startswith("```") and line.endswith("```"):
-                    line = line[3:-3]
-                res.append(line)
-            else:
-                raise ParseError(f"Failed to parse GPT output")
-        return res
+    def json_parse(text: str) -> list[str]:
+        if text.startswith("```") and text.endswith("```"):
+            i = text.find("[")
+            if i == -1:
+                raise ParseError("Failed to parse GPT output")
+            text = text[i:-3]
 
-    @staticmethod
-    def json_parse(input: str) -> list[str]:
         try:
-            json_res = json.loads(input)
+            parsed_text = json.loads(text)
         except Exception as e:
             raise ParseError(f"Failed to parse GPT output: {e}")
 
-        if not isinstance(json_res, list):
-            if json_res["translation"].startswith("```") and json_res[
-                "translation"
-            ].endswith("```"):
-                json_res["translation"] = json_res["translation"][3:-3]
-
-            return [json_res["translation"]]
-
-        """
-        Sometimes, the response enclosed in triple backticks
-        """
-        for trans in json_res:
-            if trans["translation"].startswith("```") and trans["translation"].endswith(
-                "```"
-            ):
-                trans["translation"] = trans["translation"][3:-3]
-
-        res = [trans["translation"] for trans in json_res]
-
-        return res
+        if not isinstance(parsed_text, list):
+            return [parsed_text]
+        return parsed_text
 
     @staticmethod
     def batch_translate(texts: list[str], lang: str) -> list[str]:
         append_text = "\n".join(
-            [f"{num}. ```{text}```" for num, text in enumerate(texts)]
+            [f"{num+1}. {text}" for num, text in enumerate(texts)]
         )
         pmt = PROMPT.format(lang=lang) + append_text
-
         try:
             res = completion(pmt, model=settings.OPENAI_MODEL)
         except Exception as e:
@@ -200,10 +184,7 @@ class Translater:
 
         logging.info(f"OpenAI response: \n{res}\n")
 
-        if res.startswith("1"):
-            return Translater.list_parse(res)
-        else:
-            return Translater.json_parse(res)
+        return Translater.json_parse(res)
 
     def check_translation_if_existed(self, string_id, lang_id):
         res = crowdin.string_translations.list_string_translations(
@@ -259,7 +240,7 @@ class Translater:
                 self.print_failed_files()
                 exit(-1)
 
-            texts = [string.text for string in strings[i : i + self.batch_size]]
+            texts = [string.text for string in strings[i: i + self.batch_size]]
             try:
                 translation = self.batch_translate(texts, lang_name)
             except Exception as e:
