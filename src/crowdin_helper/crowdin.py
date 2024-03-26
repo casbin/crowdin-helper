@@ -246,7 +246,7 @@ class Translater:
             except Exception as e:
                 self.failed_file.add(file.path)
                 self.error_count += 1
-                logging.error(f"Error: {e}")
+                logging.exception(e)
                 continue
 
             for j, trans in enumerate(translation):
@@ -259,7 +259,7 @@ class Translater:
                 except Exception as e:
                     self.failed_file.add(file.path)
                     self.error_count += 1
-                    logging.error(f"Error: {e}")
+                    logging.exception(e)
                     continue
 
     def print_failed_files(self):
@@ -288,7 +288,7 @@ class Translater:
                 self.file_translate(file, lang_id, lang_name)
             except Exception as e:
                 logging.error(f"Failed to translate file: {file.path}")
-                logging.error(f"Error: {e}")
+                logging.exception(e)
                 self.failed_file.add(file.path)
                 continue
 
